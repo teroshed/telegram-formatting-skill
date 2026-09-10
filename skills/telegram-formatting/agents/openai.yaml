@@ -1,0 +1,4 @@
+interface:
+  display_name: "Telegram Formatting"
+  short_description: "Readable Telegram messages and rendering checks"
+  default_prompt: "Use $telegram-formatting to make this Telegram message readable and choose the correct formatting payload for its delivery surface."
