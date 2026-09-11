@@ -1,6 +1,46 @@
 # Message recipes
 
-These are original editorial examples, written as previews rather than transport markup. Apply the selected transport separately. Use real states and next actions from the application.
+These are original examples. Start with actual source for the chosen delivery route; the emoji comparisons below are optional presentation variants.
+
+## A compact message with real rich text
+
+Ordinary Bot API HTML, with `parse_mode: "HTML"`:
+
+~~~~html
+<b>Reading notes ready</b>
+
+<i>A short comparison of the two proposals.</i>
+<blockquote>Keep the first version easy to inspect.</blockquote>
+
+• <b>Option A:</b> smaller initial scope
+• <b>Option B:</b> broader configuration
+
+<u>Next step:</u> Review the notes before Friday.
+<a href="https://example.com/notes">Open notes</a>
+Reference: <code>review_a17c</code>
+<tg-spoiler>Optional detail: the example answer is 42.</tg-spoiler>
+~~~~
+
+The same ordinary message in MarkdownV2, with `parse_mode: "MarkdownV2"`:
+
+~~~~text
+*Reading notes ready*
+
+_A short comparison of the two proposals\._
+>Keep the first version easy to inspect\.
+
+• *Option A:* smaller initial scope
+• *Option B:* broader configuration
+
+__Next step:__ Review the notes before Friday\.
+[Open notes](https://example.com/notes)
+Reference: `review_a17c`
+||Optional detail: the example answer is 42\.||
+~~~~
+
+Both recipes use real emphasis, a quote, a named link, copyable code, and an optional spoiler. The bullets are ordinary text. Replace example content with the user's text and escape inserted data in its appropriate context; the static markup is not permission to interpret dynamic text as HTML or Markdown.
+
+For a human client's composer, paste the words and apply native Bold, Italic, Quote, Underline, Link, Monospace, and Spoiler to the corresponding spans. Use the [composer shortcuts](syntax.md#client-composer) only for a known compatible editor. For highlights, tables, math, or structured lists, use the [separate Rich Message examples](rich-messages.md).
 
 ## Same message, three emoji levels
 

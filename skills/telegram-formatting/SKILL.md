@@ -1,38 +1,45 @@
 ---
 name: telegram-formatting
-description: Compose and debug readable Telegram messages, choosing Bot API HTML, MarkdownV2, entities, or Telegram Web rich text. Use for message layout, escaping, emoji density, and rendering checks; not for account setup, chat scraping, or general bot architecture.
+description: Write and debug Telegram rich text with concrete syntax for client composers, Bot API HTML or MarkdownV2, entities, GramIO, and Rich Messages. Use for formatting messages, escaping, and rendering checks; not account setup or general bot architecture.
 ---
 
 # Telegram formatting
 
-Make the message easy to scan without losing its meaning. Preserve the user's tone, locale, content, and requested emoji level.
+Produce usable formatted text, not just layout advice. Preserve the user's wording, tone, locale, and requested emoji level. When showing source syntax, put it in a code fence so the surrounding chat renderer cannot consume the delimiters.
 
-## Choose the delivery surface first
+## Everyday syntax at a glance
 
-Distinguish an ordinary bot message, a newer Rich Message, and text typed into a human client's composer. They do not share a universal Markdown dialect. Read [transports.md](references/transports.md) for the selected route. Inspect an existing bot's installed framework before changing its formatting pipeline.
+Identify the destination before choosing a column. Composer shortcuts below are supported by the inspected Telegram Desktop input-field source; they are not a promise about every client, version, paste route, or editor mode. If the client is unknown, name the assumption and provide the native formatting-menu route.
 
-Keep dynamic user text as data. Use an entity builder or context-specific escaping. Do not parse untrusted prompts as formatting, concatenate unescaped markup, or silently discard content to fit a limit. For long messages, paginate at meaningful boundaries and preserve access to the full original.
+| Style | Desktop composer shortcut | Ordinary Bot API HTML | Ordinary Bot API MarkdownV2 |
+| --- | --- | --- | --- |
+| Bold | `**ready**` | `<b>ready</b>` | `*ready*` |
+| Italic | `__note__` | `<i>note</i>` | `_note_` |
+| Underline | Select text → Underline | `<u>deadline</u>` | `__deadline__` |
+| Strikethrough | `~~old~~` | `<s>old</s>` | `~old~` |
+| Spoiler | `\|\|answer\|\|` | `<tg-spoiler>answer</tg-spoiler>` | `\|\|answer\|\|` |
+| Inline code | `` `request_id` `` | `<code>request_id</code>` | `` `request_id` `` |
+| Code block | Triple-backtick fence; inspect draft | `<pre>line 1…</pre>` | Triple-backtick fence |
+| Named link | Select text → Create Link | `<a href="https://example.com">Open</a>` | `[Open](https://example.com)` |
+| Quote | Select text → Quote | `<blockquote>excerpt</blockquote>` | `>excerpt` at the start of each quoted line |
 
-## Give the eye a clear order
+The pipe characters inside code cells are literal delimiters. See [syntax.md](references/syntax.md) for copyable blocks, HTML aliases, escaping, expandable quotes, timestamps, client evidence, and keyboard/menu guidance. Source: [ordinary Bot API formatting](https://core.telegram.org/bots/api#formatting-options) and [Desktop input-field implementation](https://github.com/desktop-app/lib_ui/blob/master/ui/widgets/fields/input_field.cpp).
 
-Lead with the state or outcome. Use a short bold heading, a separate excerpt or body, then a concrete next step. Put IDs and commands in monospace. Reserve emphasis for what changes the reader's decision; avoid whole paragraphs in bold and decorative separators on every line.
+Do not prescribe `___underline___` as a universal shortcut: the inspected Desktop parser excludes underline delimiters. In MarkdownV2, `__text__` means underline; triple underscores involve italic/underline ambiguity. In **Rich Message Markdown**, `__text__` means bold. These are different grammars.
 
-For workflow messages, separate state, evidence and action. A recommendation is not approval; approval is not execution. A blocked review needs both a visible blocker and an honest next step. Do not hide failures behind a cheerful pending label.
+## Choose the needed detail
 
-Use emoji according to the requested level:
+- **Typing or pasting into a human client:** use [composer guidance](references/syntax.md#client-composer) and inspect the draft. Use native formatting when a shortcut is uncertain.
+- **Ordinary bot text:** use the quick reference above and [syntax.md](references/syntax.md). Prefer the project's existing HTML/entity pipeline; do not silently replace it.
+- **Entity offsets or GramIO code:** read [transports.md](references/transports.md). Entity builders preserve formatting through composition; do not add `parse_mode` to their output.
+- **Highlight, subscript, superscript, headings, lists, tables, or math:** read [rich-messages.md](references/rich-messages.md). These have documented Rich Message syntax, distinct from ordinary-message entities and from the MTProto `RichText` type.
+- **Message presentation:** [recipes.md](references/recipes.md) includes actual HTML/MarkdownV2 source and optional emoji comparisons.
+- **Authorized Telegram Web rendering trials:** read [client-tests.md](references/client-tests.md), including the limits of earlier observations.
 
-- **None:** no emoji; words carry every distinction.
-- **Low:** zero to two useful markers per short message.
-- **High:** a meaningful marker per section, with text labels retained. Avoid repeated emoji strings and unrelated decoration.
+## Compose and verify
 
-These counts are design defaults, not Telegram limits. Prefer low when unspecified. See [recipes.md](references/recipes.md) for examples to adapt, not rigid templates. Spoilers are visual concealment, not protection for secrets; don't use them for essential warnings or actions.
+Use a short bold title, readable paragraphs, and specific emphasis. Put copyable IDs or commands in code; use a quote for an excerpt, a link for an action, and spoilers only for optional concealed text. A spoiler does not protect secrets. Emoji are optional; zero to two useful markers per short message is a reasonable default, not a Telegram limit.
 
-## Verify the actual route
+Keep dynamic text as data. Use an entity builder or the correct text/code/link escaping context, and preserve the complete content when splitting long messages. The optional [escaping helper](scripts/escape.mjs) escapes fragments; it is not a Markdown parser or URL validator.
 
-Validate serialized text and entity ranges for bot code, including emoji, non-Latin text, punctuation, line breaks, and long inputs. The optional [escaping helper](scripts/escape.mjs) handles text contexts only; it is not a Markdown parser or URL validator.
-
-When the user authorizes client testing, confirm the destination from visible UI, send a small set of synthetic samples, and inspect the sent messages. A draft preview or successful HTTP response alone is not visual verification. Test ordinary text as well as the requested emoji density. Check wrapping, spacing, monospace, and the discoverability of the action.
-
-Read [client-tests.md](references/client-tests.md) before Telegram Web trials. If authentication or sending authorization is missing, prepare drafts and report the specific untested boundary. Do not scrape session tokens or send to an arbitrary chat.
-
-Report implementation checks separately from client observations. Include the tested client and date, and label untested newer features. Refresh official references when behavior, limits or API versions matter; do not claim every Telegram client renders identically.
+Check final text, entity ranges, Unicode, punctuation, and nesting for the chosen route. Report source inspection, local checks, server acceptance, and visual client checks separately. Neither an HTTP success nor this skill's syntax tables proves rendering on every client. Send test messages only to an authorized destination; otherwise prepare the payload and state what remains untested.
